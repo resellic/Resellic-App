@@ -50,4 +50,7 @@ jobs:
           mkdir -p out
           cp proj/app/build/outputs/apk/release/*.apk out/Resellic-App.apk
 
-      - uses: actions/upload-a
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Resellic-App
+          path: out/Resellic-App.apk
