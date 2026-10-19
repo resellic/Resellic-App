@@ -18,6 +18,9 @@ jobs:
       - name: Unzip project
         run: unzip -q resellic-client-app.zip -d proj
 
+      - name: Firebase config
+        run: cp google-services.json proj/app/ 2>/dev/null || true
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -43,7 +46,15 @@ jobs:
         working-directory: proj
         env:
           GITHUB_RUN_NUMBER: ${{ github.run_number }}
-        run: gradle :app:assembleRelease --no-daemon --stacktrace
+        run: |
+          set -o pipefail
+          gradle :app:assembleRelease --no-daemon 2>&1 | tee build.log
+
+      - name: Show errors
+        if: failure()
+        working-directory: proj
+        run: |
+          { echo '```'; grep -E "^e: |What went wrong" -A2 build.log | head -80; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Rename APK
         run: |
